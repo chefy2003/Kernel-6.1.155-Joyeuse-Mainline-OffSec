@@ -1,0 +1,30 @@
+/dts-v1/;
+
+#include "sm7125.dtsi"          // Извикваме твоя базов силициев гръбнак
+#include "sm7125-pinctrl.dtsi"  // Извикваме твоята пълна карта на пиновете
+#include "pm6150.dtsi"          // Включваме главния захранващ чип
+#include "pm6150l.dtsi"         // Включваме вторичния захранващ чип
+
+/ {
+	model = "Xiaomi Redmi Note 9 Pro (Joyeuse) - Mainline OffSec Edition";
+	compatible = "xiaomi,joyeuse", "qcom,sm7125";
+
+	chosen {
+		bootargs = "earlycon=msm_geni_serial,0xa90000 androidboot.hardware=joyeuse cgroup_disable=pressure";
+	};
+};
+
+// Влизаме в пин-контролера, за да заварим nfc състоянията, описани в твоя патрон
+&tlmm {
+	// Тук mainline драйверът автоматично ще прочете nfc_int_active и останалите етикети!
+};
+
+// ГОЛЯМАТА ХИРУРГИЯ: Палиме I2C контролера на Joyeuse и вграждаме твоя готов NQ патрон!
+&qupv3_se9_i2c {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pm8008_active>; // Ползваме базовата PMIC синхронизация
+
+	// Набиваме твоето майсторско съдържание директно на адрес 0x28!
+	#include "joyeuse_nfc.dtsi"
+};

@@ -1,0 +1,13 @@
+kernel {
+    panic = 10
+    msg_fill = on
+}
+init {
+    env {
+        # Тук можем да подадем променливи към нашия init скрипт
+        MODE = "PUPPETEER_SCAVENGER"
+        TARGET_SLOT = "B"
+    }
+}
+# Позволява ни да виждаме всичко, ако нещо се обърка при първия старт
+bootconfig.debug = on

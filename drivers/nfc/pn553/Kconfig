@@ -1,0 +1,7 @@
+config NFC_PN553
+	tristate "NXP PN553 NFC support"
+	depends on NFC_NCI && I2C
+	default y
+	help
+	  Драйвер за NXP PN553 NFC чипсет, вграден ръчно от Архитекта.
+	  Необходим за пълната функционалност на Redmi Note 9 Pro в Слот B.
