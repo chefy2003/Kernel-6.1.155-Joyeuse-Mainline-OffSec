@@ -116,10 +116,12 @@ An installation archive has been generated using the **AnyKernel3** deployment t
 - **SHA-256 Checksum**: `338c4b393386e10fd6d67e7767013aec95ff279164f206cf894ecdc9c46217c9`
 - **Target Hardware**: Joyeuse, Curtana, Gram, Excalibur (Qualcomm Atoll / SM7125 family)
 
-### Method A: Non-Destructive RAM Boot (Recommended)
-To prevent accidental bootloops or partition corruption, boot the kernel payload directly into volatile memory:
+### Method A: Non-Destructive RAM Boot (Recommended & Required for Testing)
+**IMPORTANT NOTICE FOR TESTERS**: This early bring-up kernel is intended for low-level architecture verification and does **NOT** currently boot standard Android userland (MIUI / HyperOS / standard AOSP). Flashing on top of an existing Android installation will result in a userspace crash due to incompatible vendor 4.14 HAL daemons and missing proprietary modules.
 
-1. Unpack `boot.img` from the test package.
+**Method A (`fastboot boot`) is the ONLY recommended validation route at this stage**, utilizing the minimal standalone bring-up ramdisk:
+
+1. Unpack `boot.img` containing the mainline kernel, DTB, and the standalone `init` test harness.
 2. Put the device into Fastboot mode:
    ```bash
    adb reboot bootloader
@@ -128,13 +130,15 @@ To prevent accidental bootloops or partition corruption, boot the kernel payload
    ```bash
    fastboot boot boot.img
    ```
-*(This loads the kernel into memory without writing to the UFS partition. A reboot will restore the original installation.)*
+*(This loads the kernel into volatile memory without modifying the on-flash UFS partitions. A simple hardware reboot immediately restores your existing system.)*
 
-### Method B: Recovery Installation (TWRP / OrangeFox)
-1. Perform a complete backup of the existing `Boot` and `DTBO` partitions in recovery.
+### Method B: Recovery Installation (TWRP / OrangeFox) - Experimental
+> **CRITICAL WARNING**: Standard AnyKernel3 repacking extracts the existing ramdisk from your current ROM (configured for vendor kernel 4.14). Injecting this 6.1 LTS kernel into an unmodified Android 10/11/12 rootfs will trigger a Kernel Panic during early userspace initialization. Do **NOT** use this method on your daily driver device.
+
+1. Perform a complete backup of your current `Boot` and `DTBO` partitions in recovery.
 2. Transfer `Kernel-6.1.155-Joyeuse-Mainline-OffSec-TEST1.zip` to internal storage or SD card.
-3. Flash the archive via the recovery interface.
-4. If the device reboots unexpectedly, retrieve persistent crash logs via the recovery shell:
+3. Flash the archive via the recovery interface only if running a compatible postmarketOS / mainline rootfs.
+4. In case of boot failure, retrieve the ramoops crash dump from the recovery shell:
    ```bash
    cat /sys/fs/pstore/console-ramoops > /sdcard/pstore_log.txt
    ```
